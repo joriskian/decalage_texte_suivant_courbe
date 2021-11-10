@@ -13,7 +13,6 @@ const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
 mySvg.style.width = window.innerWidth - scrollBarWidth;
 mySvg.style.height = parts[parts.length -1].getClientRects()[0].y + window.scrollY + parts[parts.length - 1].getClientRects()[0].height;
 
-
 // decaler les elements en courbe sinusoidale
 parts.forEach((value, index)=>{
     // ajouter la sinusoide 
@@ -24,6 +23,7 @@ parts.forEach((value, index)=>{
     pts.push(parseFloat(x.toFixed(2)));
     pts.push(parseFloat(y.toFixed(2)));
 });
+
 // ajouter les points a la fin pour aller jusqu'au bout de la page. 
 pts.push(parts[parts.length -1].getClientRects()[0].x, mySvg.style.height);
 
@@ -33,20 +33,17 @@ for(let i =0; i < pts.length; i+=2){
     road +=' L ' + pts[i] + " " + pts[i+1] ;
 }
 
-
 // construit le path -> #roadPath   
 let newpath = document.createElementNS("http://www.w3.org/2000/svg", "path");
 newpath.setAttributeNS(null, "id", "roadPath");
 newpath.setAttributeNS(null, "d", road);
-newpath.setAttributeNS(null, "stroke", "grey"); // couleur du chemin
+newpath.setAttributeNS(null, "stroke", "grey"); 
 newpath.setAttributeNS(null, "stroke-width", "60"); 
 newpath.setAttributeNS(null, "opacity", "0.5");
 newpath.setAttributeNS(null, "fill", "transparent");
 mySvg.appendChild(newpath);
 
-
 //GSAP
-
 //register the plugin (just once)
 gsap.registerPlugin(MotionPathPlugin, ScrollTrigger);
 
@@ -82,7 +79,6 @@ animation = gsap.to("#mercoTop", {
     autoRotate: -90,
   },
 });
-
 
 //test
 console.log(lastLi.getClientRects()[0].y + window.scrollY);
