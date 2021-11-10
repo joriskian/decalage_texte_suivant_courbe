@@ -1,0 +1,54 @@
+
+*{
+    margin:0;
+    padding: 0;
+  }
+  body{
+    font-family: 'Zen Kurenaido', sans-serif;
+    font-size: larger;
+    
+  }
+  #wrapper{
+      background-color: rosybrown;
+      max-width: 100vw;
+  }
+  .content{
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: rgb(199, 186, 185);
+    color: rgb(255, 255, 255);
+
+  }
+  .content h1{
+      margin-bottom: 4rem;
+      text-transform: uppercase;
+      max-width: 50vw;
+      text-align: center;
+  }
+  .content h2{
+    margin-top: 4rem;
+    margin-bottom: 3rem;
+  }
+  .content ul{
+    list-style-type: none;
+    width: fit-content;
+  }
+  .content ul:not(:last-child){
+    margin-bottom: 2rem;
+  }
+  .content ul li:not(:last-child){
+      margin-bottom: 3rem;
+  }
+ 
+  #mySvg{
+    position: absolute;
+    top: 0;
+    left: 0;
+
+  } 
+  #mercoTop{
+    position: absolute;
+    top: 50px;
+    left: 50px;
+  }
