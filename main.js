@@ -23,25 +23,41 @@ parts.forEach((value, index)=>{
     pts.push(parseFloat(x.toFixed(2)));
     pts.push(parseFloat(y.toFixed(2)));
 });
-
 // ajouter les points a la fin pour aller jusqu'au bout de la page. 
-pts.push(parts[parts.length -1].getClientRects()[0].x, mySvg.style.height);
-
+pts.push(parts[parts.length -1].getClientRects()[0].x, parts[parts.length -1].getClientRects()[0].y + window.scrollY + parts[parts.length - 1].getClientRects()[0].height);
 // construit la route
-road += "M "+pts[0]+" "+0;
+road += "M "+(pts[0] - 50)+" "+pts[1];
 for(let i =0; i < pts.length; i+=2){
-    road +=' L ' + pts[i] + " " + pts[i+1] ;
+  road +=' L ' + (pts[i] - 50) + " " + pts[i+1] ; //decalage de -50 en x pour la courbe
 }
 
+
+//construit le decor ( element de gauche)
+// closed path 
+// en bas a gauche, en haut a gauche, departs de la route, fin de la route
+let decors= "";
+decors += "M 0 " + pts[pts.length-1];
+decors += " 0 "+ pts[1] + " ";
+decors += (pts[0]-50) +" "+ pts[1];
+for(let i =0; i < pts.length; i+=2){
+  decors +=' L ' + (pts[i] - 50) + " " + pts[i+1] ; //decalage de -50 en x pour la courbe
+}
+decors += " Z";
+
 // construit le path -> #roadPath   
-let newpath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-newpath.setAttributeNS(null, "id", "roadPath");
-newpath.setAttributeNS(null, "d", road);
-newpath.setAttributeNS(null, "stroke", "grey"); 
-newpath.setAttributeNS(null, "stroke-width", "60"); 
-newpath.setAttributeNS(null, "opacity", "0.5");
-newpath.setAttributeNS(null, "fill", "transparent");
-mySvg.appendChild(newpath);
+function createPath(path, id, strokeWidth = 0, colorStroke = "black", colorFill = "grey" ,opacity = 1) {
+  let newpath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  newpath.setAttributeNS(null, "id", id);
+  newpath.setAttributeNS(null, "d", path);
+  newpath.setAttributeNS(null, "stroke", colorStroke); 
+  newpath.setAttributeNS(null, "stroke-width", strokeWidth); 
+  newpath.setAttributeNS(null, "opacity", opacity);
+  newpath.setAttributeNS(null, "fill", colorFill);
+  mySvg.appendChild(newpath);
+}
+
+createPath(decors,"decorsPath");
+createPath(road,"roadPath", 60, "lightGrey", "transparent",1);
 
 //GSAP
 //register the plugin (just once)
@@ -55,9 +71,9 @@ gsap.set("#mercoTop", { transformOrigin: "50% 50%" });
 animation = gsap.to("#mercoTop", {
   scrollTrigger: {
     trigger: "#roadPath",
-    start: "top 10%",
+    start: "top 25%",
     end: "bottom 90%",
-    scrub: 0.8, // 0.4 seconde to catch up
+    scrub: 0.4, // 0.4 seconde to catch up
     markers: false,
     onUpdate: (self) => {
       gsap.to("#mercoTop", {
@@ -66,7 +82,7 @@ animation = gsap.to("#mercoTop", {
       });
     },
     onRefresh: (self) => {
-      console.log("self|trigger : ",self.trigger)
+      // console.log("self|trigger aka #roadPath: ",self.trigger)
     },
   },
   duration: 10,
@@ -81,7 +97,8 @@ animation = gsap.to("#mercoTop", {
 });
 
 //test
-console.log(lastLi.getClientRects()[0].y + window.scrollY);
-console.log(pts[141]);
-console.log(roadPath.outerHTML);
+// console.log("taille total jusqu'au dernier : ", lastLi.getClientRects()[0].y + window.scrollY);
+// console.log("pts[141] : ",pts[141]);
+// console.log("roadPath.outerHTML : ",roadPath.outerHTML);
+console.log("decor : ",decors);
 

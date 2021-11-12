@@ -9,21 +9,20 @@
     
   }
   #wrapper{
-      background-color: rosybrown;
+      background-color: rgb(187, 187, 187);
       max-width: 100vw;
   }
   .content{
     width: fit-content;
-    margin-left: auto;
     margin-right: auto;
-    background-color: rgb(199, 186, 185);
+    margin-left: auto;
+    /* background-color: rgb(160, 160, 160); */
     color: rgb(255, 255, 255);
-
   }
-  .content h1{
-      margin-bottom: 4rem;
+  #wrapper h1{
+      /* background-color: rgb(199, 186, 185); */
+      color: rgba(255, 255, 255, 0.856);
       text-transform: uppercase;
-      max-width: 50vw;
       text-align: center;
   }
   .content h2{
@@ -40,12 +39,13 @@
   .content ul li:not(:last-child){
       margin-bottom: 3rem;
   }
- 
+  .content ul li{
+    max-width: 60vw;
+  }
   #mySvg{
     position: absolute;
     top: 0;
     left: 0;
-
   } 
   #mercoTop{
     position: absolute;
