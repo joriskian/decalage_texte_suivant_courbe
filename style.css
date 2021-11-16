@@ -52,3 +52,20 @@
     top: 50px;
     left: 50px;
   }
+  .footer{
+    position: sticky;
+    width: 100%;
+    bottom: 1vh;
+    height: fit-content;
+    background-color: grey;
+  }
+  .footer div{
+    font-size: small;
+  }
+  #merco{
+    width: 80px;
+    height: 34px;
+    /* line-height: 8vh;  */
+    background-image: url('/assets/voiture03.png');
+    background-size:contain;
+  }

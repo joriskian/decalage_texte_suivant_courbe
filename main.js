@@ -2,12 +2,24 @@
 //variables
 let pts = [] // tableau des points correspondant au x et y de chaque elements
 let road =""; // path pour la route
+let newYposition = 0; // position du scroll
+let scrollWidth = getScrollWidth(); // largeur de la barre de defilement
+let ratio = getRatio(); // ratio hauteur/largeur
 
 //creer un tableau des elements de content ( sauf les <ul> et le <h1>)
 const parts = [...content.querySelectorAll(":not(ul,h1)")];
+//recupère toutes les h2 -> toutes les années
+const yearTitles = [...document.getElementsByTagName("h2")]; //spread operator on nodeHtml to transform like an array
+//recupere le footer
+const footer = document.getElementsByClassName("footer")[0]; // recupère le premier element ( et le seul ...)
+console.log(footer);
 
 // taille de la barre de defilement
 const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+//crée les etiquettes pour les années et les positionne dans le footer
+drawHorizontalYears(yearTitles);
+
 
 // mettre le svg à la bonne taille
 mySvg.style.width = window.innerWidth - scrollBarWidth;
@@ -44,17 +56,7 @@ for(let i =0; i < pts.length; i+=2){
 }
 decors += " Z";
 
-// construit le path -> #roadPath   
-function createPath(path, id, strokeWidth = 0, colorStroke = "black", colorFill = "grey" ,opacity = 1) {
-  let newpath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  newpath.setAttributeNS(null, "id", id);
-  newpath.setAttributeNS(null, "d", path);
-  newpath.setAttributeNS(null, "stroke", colorStroke); 
-  newpath.setAttributeNS(null, "stroke-width", strokeWidth); 
-  newpath.setAttributeNS(null, "opacity", opacity);
-  newpath.setAttributeNS(null, "fill", colorFill);
-  mySvg.appendChild(newpath);
-}
+
 
 createPath(decors,"decorsPath");
 createPath(road,"roadPath", 60, "lightGrey", "transparent",1);
@@ -94,6 +96,109 @@ animation = gsap.to("#mercoTop", {
     alignOrigin: [0.5, 0.5],
     autoRotate: -90,
   },
+});
+
+//FUNCTIONs------------------
+
+//recupere la taille de la barre de defilement
+function getScrollWidth() {
+  return window.innerWidth - document.body.offsetWidth;
+}
+
+// recupère le ratio hauteur /largeur
+function getRatio() {
+  return (
+    (document.body.clientWidth - merco.clientWidth - scrollWidth) /
+    (wrapper.clientHeight + wrapper.offsetTop - window.innerHeight)
+  );
+}
+
+// construit le path -> #roadPath   
+function createPath(path, id, strokeWidth = 0, colorStroke = "black", colorFill = "grey" ,opacity = 1) {
+  let newpath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  newpath.setAttributeNS(null, "id", id);
+  newpath.setAttributeNS(null, "d", path);
+  newpath.setAttributeNS(null, "stroke", colorStroke); 
+  newpath.setAttributeNS(null, "stroke-width", strokeWidth); 
+  newpath.setAttributeNS(null, "opacity", opacity);
+  newpath.setAttributeNS(null, "fill", colorFill);
+  mySvg.appendChild(newpath);
+}
+
+// fonction qui modifie la place des etiquettes "année" sur le footer
+function updateYears(h, v) {
+  for (let i = 0; i < h.length; i++) {
+    // v[0].style.transform = "translateX("+ (((h[0].offsetTop + h[0].clientHeight) /(document.body.clientHeight )) * (footer.clientWidth - merco.clientWidth) )+"px) rotateZ(12rad)";
+    v[i].style.transform =
+      "translateX(" +
+      ((h[i].offsetTop + h[i].clientHeight) / document.body.clientHeight) *
+        (footer.clientWidth - merco.clientWidth) +
+      "px) rotateZ(12rad)";
+  }
+}
+
+// recupère le ratio hauteur /largeur
+function getRatio() {
+  return (
+    (document.body.clientWidth - merco.clientWidth - scrollWidth) /
+    (wrapper.clientHeight + wrapper.offsetTop - window.innerHeight)
+  );
+}
+
+function drawHorizontalYears(htmlArray) {
+  //crée les etiquettes pour les années et les positionne dans le footer
+  //TODO : Problemes sur le positionnement
+  htmlArray.forEach((title) => {
+    // pour chaque année : ajouter une etiquette à la position sur le footer...
+    // creer une etiquette avec l'année:
+    let year = document.createElement("div");
+    // lui donne une class
+    year.classList = "vertical-years";
+    // insert l'annsée en texte
+    year.innerHTML = title.innerText;
+    // la positionner sur le footer :
+    footer.appendChild(year);
+    // la transformer pour qu'elle soit en vertical et a la bonne position
+    year.style.display = "inline-block";
+    year.style.writingMode = "vertical-lr";
+    // les transformations doivent s'ecrire ensemble sous peine d'en voir une se faire ecraser par l'autre
+    year.style.transform =
+      "translateX(" +
+      // (title.offsetTop + title.clientHeight)  * ratio +
+      ((title.offsetTop + title.clientHeight) / document.body.clientHeight) *
+      (footer.clientWidth - merco.clientWidth) +
+      "px) rotateZ(210deg)";
+    // year.style.transform = "translateX("+ (((title.offsetTop + title.clientHeight) /(document.body.clientHeight )) * (footer.clientWidth - merco.clientWidth) )+"px) rotateZ(12rad)";
+  });
+}
+//EVENT LISTENERs -----------
+
+// bouge la merco en fonction du scroll
+document.addEventListener("scroll", function (e) {
+  newYposition = window.scrollY;
+  merco.style.transform = "translateX(" + newYposition * ratio + "px)";
+});
+
+// update quand resize
+window.addEventListener("resize", () => {
+  // update la taille de la barre de defilement
+  scrollWidth = getScrollWidth();
+  // recalcule le ratio
+  ratio = getRatio();
+  // recupère les elements 'etiquette d'année
+  let verticalYears = [...document.getElementsByClassName("vertical-years")];
+  // repositionne les etiquettes sur le footer
+  updateYears(yearTitles, verticalYears);
+  // update la position de la merco
+  merco.style.transform = "translateX(" + newYposition * ratio + "px)";
+  // reconstruit le path TODO
+
+});
+
+// scroll quand on click sur le footer
+footer.addEventListener("click", function (e) {
+  // scroll la page en fonction de la position x de la souris
+  window.scrollTo(0, e.x / ratio);
 });
 
 //test
