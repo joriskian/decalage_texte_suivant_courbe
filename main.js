@@ -1,7 +1,8 @@
 
 //variables
-let pts = [] // tableau des points correspondant au x et y de chaque elements
-let road =""; // path pour la route
+// let pts = [] // tableau des points correspondant au x et y de chaque elements
+// let road =""; // path pour la route
+let tween; //gsap scroll animation
 let newYposition = 0; // position du scroll
 let scrollWidth = getScrollWidth(); // largeur de la barre de defilement
 let ratio = getRatio(); // ratio hauteur/largeur
@@ -12,7 +13,6 @@ const parts = [...content.querySelectorAll(":not(ul,h1)")];
 const yearTitles = [...document.getElementsByTagName("h2")]; //spread operator on nodeHtml to transform like an array
 //recupere le footer
 const footer = document.getElementsByClassName("footer")[0]; // recupère le premier element ( et le seul ...)
-console.log(footer);
 
 // taille de la barre de defilement
 const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -22,11 +22,36 @@ drawHorizontalYears(yearTitles);
 
 
 // mettre le svg à la bonne taille
-mySvg.style.width = window.innerWidth - scrollBarWidth;
-mySvg.style.height = parts[parts.length -1].getClientRects()[0].y + window.scrollY + parts[parts.length - 1].getClientRects()[0].height;
+svgSetUpSize();
 
-// decaler les elements en courbe sinusoidale
-parts.forEach((value, index)=>{
+
+
+let pts = twistElements(parts);
+road = setupRoad(pts);
+decors = setupDecors(pts);
+
+
+createPath(decors,"decorsPath");
+createPath(road,"roadPath", 60, "lightGrey", "transparent",1);
+
+//GSAP----------------------
+//register the plugin (just once)
+gsap.registerPlugin(MotionPathPlugin, ScrollTrigger);
+
+// gsap scroll animation
+createTween();
+
+//FUNCTIONs------------------
+
+// mets le svg à la bonne taille
+function svgSetUpSize(){
+  mySvg.style.width = window.innerWidth - scrollBarWidth;
+  mySvg.style.height = parts[parts.length -1].getClientRects()[0].y + window.scrollY + parts[parts.length - 1].getClientRects()[0].height;
+}
+
+function twistElements(els){
+  let pts = [] // tableau des points correspondant au x et y de chaque elements
+  els.forEach((value, index)=>{
     // ajouter la sinusoide 
     value.style.transform = "translateX("+ ( Math.sin(index *( Math.PI/8))*50 ) +"px)";
     // recuperer la position des elements dans un tableau
@@ -35,70 +60,31 @@ parts.forEach((value, index)=>{
     pts.push(parseFloat(x.toFixed(2)));
     pts.push(parseFloat(y.toFixed(2)));
 });
-// ajouter les points a la fin pour aller jusqu'au bout de la page. 
-pts.push(parts[parts.length -1].getClientRects()[0].x, parts[parts.length -1].getClientRects()[0].y + window.scrollY + parts[parts.length - 1].getClientRects()[0].height);
-// construit la route
-road += "M "+(pts[0] - 50)+" "+pts[1];
-for(let i =0; i < pts.length; i+=2){
+  // ajouter les points a la fin pour aller jusqu'au bout de la page. 
+  pts.push(parts[parts.length -1].getClientRects()[0].x, parts[parts.length -1].getClientRects()[0].y + window.scrollY + parts[parts.length - 1].getClientRects()[0].height);
+  return pts;
+}
+
+function setupRoad(pts){
+  let road = "";
+  road += "M "+(pts[0] - 50)+" "+pts[1];
+  for(let i =0; i < pts.length; i+=2){
   road +=' L ' + (pts[i] - 50) + " " + pts[i+1] ; //decalage de -50 en x pour la courbe
+  }
+  return road;
 }
 
-
-//construit le decor ( element de gauche)
-// closed path 
-// en bas a gauche, en haut a gauche, departs de la route, fin de la route
-let decors= "";
-decors += "M 0 " + pts[pts.length-1];
-decors += " 0 "+ pts[1] + " ";
-decors += (pts[0]-50) +" "+ pts[1];
-for(let i =0; i < pts.length; i+=2){
+function setupDecors(pts){
+  let decors= "";
+  decors += "M 0 " + pts[pts.length-1];
+  decors += " 0 "+ pts[1] + " ";
+  decors += (pts[0]-50) +" "+ pts[1];
+  for(let i =0; i < pts.length; i+=2){
   decors +=' L ' + (pts[i] - 50) + " " + pts[i+1] ; //decalage de -50 en x pour la courbe
+  }
+  decors += " Z";
+  return decors;
 }
-decors += " Z";
-
-
-
-createPath(decors,"decorsPath");
-createPath(road,"roadPath", 60, "lightGrey", "transparent",1);
-
-//GSAP
-//register the plugin (just once)
-gsap.registerPlugin(MotionPathPlugin, ScrollTrigger);
-
-
-// gsap scroll animation
-gsap.set("#mercoGroup", { scale: 0.7, autoAlpha: 1 });
-gsap.set("#mercoTop", { transformOrigin: "50% 50%" });
-
-animation = gsap.to("#mercoTop", {
-  scrollTrigger: {
-    trigger: "#roadPath",
-    start: "top 25%",
-    end: "bottom 90%",
-    scrub: 0.4, // 0.4 seconde to catch up
-    markers: false,
-    onUpdate: (self) => {
-      gsap.to("#mercoTop", {
-        scale: () => (self.direction === 1 ? 1 : -1),
-        overwrite: "auto",
-      });
-    },
-    onRefresh: (self) => {
-      // console.log("self|trigger aka #roadPath: ",self.trigger)
-    },
-  },
-  duration: 10,
-  ease: "none",
-  immediateRender: true,
-  motionPath: {
-    path: roadPath,
-    align: roadPath,
-    alignOrigin: [0.5, 0.5],
-    autoRotate: -90,
-  },
-});
-
-//FUNCTIONs------------------
 
 //recupere la taille de la barre de defilement
 function getScrollWidth() {
@@ -123,6 +109,10 @@ function createPath(path, id, strokeWidth = 0, colorStroke = "black", colorFill 
   newpath.setAttributeNS(null, "opacity", opacity);
   newpath.setAttributeNS(null, "fill", colorFill);
   mySvg.appendChild(newpath);
+}
+
+function updatePath(idPath, newPath){
+  idPath.setAttribute("d", newPath);
 }
 
 // fonction qui modifie la place des etiquettes "année" sur le footer
@@ -171,6 +161,40 @@ function drawHorizontalYears(htmlArray) {
     // year.style.transform = "translateX("+ (((title.offsetTop + title.clientHeight) /(document.body.clientHeight )) * (footer.clientWidth - merco.clientWidth) )+"px) rotateZ(12rad)";
   });
 }
+
+// reconstruct the trigger path (road) for gsap
+function createTween() {
+  let progress = 0;
+  if (tween) {
+    progress = tween.progress();
+    tween.kill();
+  }
+  tween = gsap.to("#mercoTop", {
+    scrollTrigger: {
+      trigger: "#roadPath",
+      start: "top 25%",
+      end: "bottom 90%",
+      scrub: 0.4, // 0.4 seconde to catch up
+      markers: false,
+      onUpdate: (self) => {
+        gsap.to("#mercoTop", {
+          scale: () => (self.direction === 1 ? 1 : -1),
+          overwrite: "auto",
+        });
+      },
+    },
+    duration: 10,
+    ease: "none",
+    immediateRender: true,
+    motionPath: {
+      path: "#roadPath",
+      align: "#roadPath",
+      alignOrigin: [0.5, 0.5],
+      autoRotate: -90,
+    },
+  });
+  tween.progress(progress);
+}
 //EVENT LISTENERs -----------
 
 // bouge la merco en fonction du scroll
@@ -191,8 +215,14 @@ window.addEventListener("resize", () => {
   updateYears(yearTitles, verticalYears);
   // update la position de la merco
   merco.style.transform = "translateX(" + newYposition * ratio + "px)";
-  // reconstruit le path TODO
-
+  // recalcule la positions des elements
+  pts = twistElements(parts);
+  // update road and decors
+  updatePath(roadPath,setupRoad(pts));
+  updatePath(decorsPath, setupDecors(pts));
+  svgSetUpSize();
+  //change the trigger in gsap
+  createTween();
 });
 
 // scroll quand on click sur le footer
@@ -200,10 +230,3 @@ footer.addEventListener("click", function (e) {
   // scroll la page en fonction de la position x de la souris
   window.scrollTo(0, e.x / ratio);
 });
-
-//test
-// console.log("taille total jusqu'au dernier : ", lastLi.getClientRects()[0].y + window.scrollY);
-// console.log("pts[141] : ",pts[141]);
-// console.log("roadPath.outerHTML : ",roadPath.outerHTML);
-console.log("decor : ",decors);
-
