@@ -20,16 +20,12 @@ const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
 //crée les etiquettes pour les années et les positionne dans le footer
 drawHorizontalYears(yearTitles);
 
-
 // mettre le svg à la bonne taille
 svgSetUpSize();
-
-
 
 let pts = twistElements(parts);
 road = setupRoad(pts);
 decors = setupDecors(pts);
-
 
 createPath(decors,"decorsPath");
 createPath(road,"roadPath", 60, "lightGrey", "transparent",1);
@@ -41,8 +37,8 @@ gsap.registerPlugin(MotionPathPlugin, ScrollTrigger);
 // gsap scroll animation
 createTween();
 
-//FUNCTIONs------------------
 
+//FUNCTIONs------------------
 // mets le svg à la bonne taille
 function svgSetUpSize(){
   mySvg.style.width = window.innerWidth - scrollBarWidth;
@@ -195,8 +191,8 @@ function createTween() {
   });
   tween.progress(progress);
 }
-//EVENT LISTENERs -----------
 
+//EVENT LISTENERs -----------
 // bouge la merco en fonction du scroll
 document.addEventListener("scroll", function (e) {
   newYposition = window.scrollY;
