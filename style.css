@@ -3,10 +3,11 @@
     margin:0;
     padding: 0;
   }
+  :root {
+    font-size: calc(1rem + 0.5vw);
+  }
   body{
     font-family: 'Zen Kurenaido', sans-serif;
-    font-size: larger;
-    
   }
   #wrapper{
       background-color: rgb(187, 187, 187);
@@ -19,12 +20,16 @@
     text-align: center;
   }
   #wrapper .header{
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -o-sticky;
+    position: -ms-sticky;
     position: sticky;
     top: 0;
     border-bottom: solid 2px rgb(105, 100, 100);
     background-color: darkgray;
-    /* offset-x | offset-y | color */
-    box-shadow: 0px 8px 5px gray  ;
+    /* offset-x | offset-y | blur | color */
+    box-shadow: 0px 4px 3px gray  ;
     z-index: 2;
   }
   #wrapper .header div{
@@ -66,6 +71,10 @@
     left: 50px;
   }
   .footer{
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -o-sticky;
+    position: -ms-sticky;
     position: sticky;
     width: 100%;
     bottom: 0;
@@ -74,8 +83,10 @@
     border-top: solid 2px lightgray;
   }
   .footer div{
-    font-size: small;
+    font-size: 50%;
+    /* font-size: small; */
   }
+
   #merco{
     width: 80px;
     height: 34px;
@@ -83,3 +94,12 @@
     background-image: url('/assets/voiture03.png');
     background-size:contain;
   }
+  @media screen and (max-width: 640px){
+    .footer{
+      font-size: calc(0.7rem);
+    }
+    #merco{
+      width: 40px;
+      height: 17px;
+  }
+}
